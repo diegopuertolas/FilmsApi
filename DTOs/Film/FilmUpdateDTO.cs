@@ -11,9 +11,9 @@ public class FilmUpdateDTO
     [Required(ErrorMessage = "El director es obligatorio.")]
     [StringLength(50, ErrorMessage = "El nombre del director no puede exceder los 50 caracteres.")]
     public required string Director { get; set; }
+    
     [StringLength(30, ErrorMessage = "El nombre del género no puede exceder los 30 caracteres.")]
     [Required(ErrorMessage = "El genero es obligatorio.")]
-
     public required string Genre { get; set; }
 
     [Required(ErrorMessage = "La duración es obligatoria.")]
