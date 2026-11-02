@@ -1,4 +1,5 @@
 using FilmsApi.DTOs.Film;
+using FilmsApi.Interfaces;
 using FilmsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +9,23 @@ namespace FilmsApi.Controllers;
 [Route("api/[controller]")]
 public class FilmsController : ControllerBase
 {
-    private static List<Film> films = new List<Film>();
+    private readonly IFilmService _filmService;
+
+    public FilmsController(IFilmService filmService)
+    {
+        _filmService = filmService;
+    }
 
     [HttpGet]
     public ActionResult<IEnumerable<Film>> GetAll()
     {
-        return Ok(films);
+        return Ok(_filmService.GetAll());
     }
 
     [HttpGet("{id}")]
     public ActionResult<Film> GetById(int id)
     {
-        var film = films.FirstOrDefault(f => f.Id == id);
+        var film = _filmService.GetById(id);
 
         if (film is null)
         {
@@ -30,38 +36,22 @@ public class FilmsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Film> Post([FromBody] FilmCreateDTO filmDTO)
+    public ActionResult<Film> Post([FromBody] FilmCreateDto filmDto)
     {
-        var newFilm = new Film
-        {
-            Id = films.Count > 0 ? films.Max(f => f.Id) + 1 : 1,
-            Title = filmDTO.Title,
-            Director = filmDTO.Director,
-            Genre = filmDTO.Genre,
-            Duration = filmDTO.Duration,
-            IsForAdultsOnly = filmDTO.IsForAdultsOnly
-        };
-
-        films.Add(newFilm);
+        var newFilm = _filmService.Create(filmDto);
 
         return CreatedAtAction(nameof(GetById), new { id = newFilm.Id }, newFilm);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(int id, [FromBody] FilmUpdateDTO filmDTO)
+    public IActionResult Update(int id, [FromBody] FilmUpdateDto filmDto)
     {
-        var film = films.FirstOrDefault(f => f.Id == id);
+        var updatedFilm = _filmService.Update(id, filmDto);
 
-        if (film is null)
+        if (!updatedFilm)
         {
             return NotFound();
         }
-
-        film.Title = filmDTO.Title;
-        film.Director = filmDTO.Director;
-        film.Genre = filmDTO.Genre;
-        film.Duration = filmDTO.Duration;
-        film.IsForAdultsOnly = filmDTO.IsForAdultsOnly;
 
         return NoContent();
     }
@@ -69,14 +59,12 @@ public class FilmsController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        var film = films.FirstOrDefault(f => f.Id == id);
+        var deletedFilm = _filmService.Delete(id);
 
-        if (film is null)
+        if (!deletedFilm)
         {
             return NotFound();
         }
-
-        films.Remove(film);
 
         return NoContent();
     }
