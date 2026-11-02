@@ -1,8 +1,13 @@
+using FilmsApi.Interfaces;
+using FilmsApi.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IFilmService, FilmService>();
 
 var app = builder.Build();
 
