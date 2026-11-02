@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FilmsApi.DTOs.Film;
 
-public class FilmCreateDTO
+public class FilmCreateDto
 {   
     [Required(ErrorMessage = "El título es obligatorio.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "El título debe tener entre 2 y 100 caracteres.")]
