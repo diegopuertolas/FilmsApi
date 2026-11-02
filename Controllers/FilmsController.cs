@@ -1,3 +1,4 @@
+using FilmsApi.DTOs.Film;
 using FilmsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,17 +30,25 @@ public class FilmsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Film> Post(Film film)
+    public ActionResult<Film> Post([FromBody] FilmCreateDTO filmDTO)
     {
-        films.Add(film);
+        var newFilm = new Film
+        {
+            Id = films.Count > 0 ? films.Max(f => f.Id) + 1 : 1,
+            Title = filmDTO.Title,
+            Director = filmDTO.Director,
+            Genre = filmDTO.Genre,
+            Duration = filmDTO.Duration,
+            IsForAdultsOnly = filmDTO.IsForAdultsOnly
+        };
 
-        film.Id = films.Count > 0 ? films.Max(f => f.Id) + 1 : 1;
+        films.Add(newFilm);
 
-        return CreatedAtAction(nameof(GetById), new { id = film.Id }, film);
+        return CreatedAtAction(nameof(GetById), new { id = newFilm.Id }, newFilm);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(int id, Film updatedFilm)
+    public IActionResult Update(int id, [FromBody] FilmUpdateDTO filmDTO)
     {
         var film = films.FirstOrDefault(f => f.Id == id);
 
@@ -48,11 +57,11 @@ public class FilmsController : ControllerBase
             return NotFound();
         }
 
-        film.Title = updatedFilm.Title;
-        film.Director = updatedFilm.Director;
-        film.Genre = updatedFilm.Genre;
-        film.Duration = updatedFilm.Duration;
-        film.IsForAdultsOnly = updatedFilm.IsForAdultsOnly;
+        film.Title = filmDTO.Title;
+        film.Director = filmDTO.Director;
+        film.Genre = filmDTO.Genre;
+        film.Duration = filmDTO.Duration;
+        film.IsForAdultsOnly = filmDTO.IsForAdultsOnly;
 
         return NoContent();
     }
