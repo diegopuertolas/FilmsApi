@@ -5,9 +5,9 @@ namespace FilmsApi.Interfaces;
 
 public interface IFilmService
 {
-    IEnumerable<Film> GetAll();
-    Film? GetById(int id);
-    Film Create(FilmCreateDto filmDto);
+    IEnumerable<FilmReadDto> GetAll();
+    FilmReadDto? GetById(int id);
+    FilmReadDto Create(FilmCreateDto filmDto);
     bool Update(int id, FilmUpdateDto filmDto);
     bool Delete(int id);
 }

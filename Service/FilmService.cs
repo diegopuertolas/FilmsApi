@@ -1,3 +1,4 @@
+using AutoMapper;
 using FilmsApi.DTOs.Film;
 using FilmsApi.Interfaces;
 using FilmsApi.Models;
@@ -6,62 +7,73 @@ namespace FilmsApi.Service;
 
 public class FilmService : IFilmService
 {
-    private readonly List<Film > _films = [];
+    private readonly List<Film> _films = [];
+    private readonly IMapper _mapper;
+    private readonly ILogger<FilmService> _logger;
 
-    public IEnumerable<Film> GetAll()
+    public FilmService(IMapper mapper, ILogger<FilmService> logger)
     {
-        return _films;
+        _mapper = mapper;
+        _logger = logger;
     }
 
-    public Film? GetById(int id)
+    public IEnumerable<FilmReadDto> GetAll()
     {
-        return _films.FirstOrDefault(f => f.Id == id);
+        return _mapper.Map<IEnumerable<FilmReadDto>>(_films);
     }
 
-    public Film Create(FilmCreateDto filmDto)
+    public FilmReadDto? GetById(int id)
     {
-        var newFilm = new Film
+        var film = _films.FirstOrDefault(f => f.Id == id);
+        
+        if (film is null)
         {
-            Id = _films.Count > 0 ? _films.Max(f => f.Id) + 1 : 1,
-            Title = filmDto.Title,
-            Director = filmDto.Director,
-            Genre = filmDto.Genre,
-            Duration = filmDto.Duration,
-            IsForAdultsOnly = filmDto.IsForAdultsOnly
-        };
+            _logger.LogWarning($"Intento de busqueda fallido. Película {id} no encontrada.");
+            return null;
+        }
+
+        return _mapper.Map<FilmReadDto>(film);
+    }
+
+    public FilmReadDto Create(FilmCreateDto filmDto)
+    {
+        _logger.LogInformation($"Creando nueva película: {filmDto.Title}");
+
+        var newFilm = _mapper.Map<Film>(filmDto);
+        newFilm.Id = _films.Count > 0 ? _films.Max(f => f.Id) + 1 : 1;
 
         _films.Add(newFilm);
-        return newFilm;
+
+        return _mapper.Map<FilmReadDto>(newFilm);
     }
 
     public bool Update(int id, FilmUpdateDto filmDto)
     {
-        var film = GetById(id);
+        var film = _films.FirstOrDefault(f => f.Id == id);
 
         if (film is null)
         {
+            _logger.LogWarning($"Intento de actualización fallido. Película {id} no encontrada.");
             return false;
         }
 
-        film.Title = filmDto.Title;
-        film.Director = filmDto.Director;
-        film.Genre = filmDto.Genre;
-        film.Duration = filmDto.Duration;
-        film.IsForAdultsOnly = filmDto.IsForAdultsOnly;
-
+        _mapper.Map(filmDto, film);
+        
         return true;
     }
 
     public bool Delete(int id)
     {
-        var film = GetById(id);
+        var film = _films.FirstOrDefault(f => f.Id == id);
 
         if (film is null)
         {
+            _logger.LogWarning($"Intento de borrado fallido. Película {id} no encontrada.");
             return false;
         }
 
         _films.Remove(film);
+        _logger.LogInformation($"Película {id} eliminada correctamente.");
         return true;
     }
 } 

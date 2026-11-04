@@ -1,5 +1,6 @@
 using FilmsApi.Interfaces;
 using FilmsApi.Service;
+using FilmsApi.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IFilmService, FilmService>();
+
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<FilmProfile>();
+});
 
 var app = builder.Build();
 

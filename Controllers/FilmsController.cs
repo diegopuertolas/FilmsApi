@@ -10,25 +10,28 @@ namespace FilmsApi.Controllers;
 public class FilmsController : ControllerBase
 {
     private readonly IFilmService _filmService;
+    private readonly ILogger<FilmsController> _logger;
 
-    public FilmsController(IFilmService filmService)
+    public FilmsController(IFilmService filmService, ILogger<FilmsController> logger)
     {
         _filmService = filmService;
+        _logger = logger;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Film>> GetAll()
+    public ActionResult<IEnumerable<FilmReadDto>> GetAll()
     {
         return Ok(_filmService.GetAll());
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Film> GetById(int id)
+    public ActionResult<FilmReadDto> GetById(int id)
     {
         var film = _filmService.GetById(id);
 
         if (film is null)
         {
+            _logger.LogWarning($"Petición GET fallida: No existe la película {id}");
             return NotFound();
         }
 
@@ -36,7 +39,7 @@ public class FilmsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Film> Post([FromBody] FilmCreateDto filmDto)
+    public ActionResult<FilmReadDto> Post([FromBody] FilmCreateDto filmDto)
     {
         var newFilm = _filmService.Create(filmDto);
 
